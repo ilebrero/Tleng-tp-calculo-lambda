@@ -1,7 +1,7 @@
 #pylint: disable=C0103,C0111,W0611
 "El parser para calculo lambda"
 import ply.yacc as yacc
-from lexer import tokens
+from lambda_lexer import tokens
 
 def p_is_zero(p):
     "exp : ISZERO L_BRACKET exp R_BRACKET"
@@ -15,7 +15,6 @@ def p_error(_):
     print("Hubo un error en el parseo.")
 
     parser.restart()
-
 
 # Build the parser
 parser = yacc.yacc(debug=True)

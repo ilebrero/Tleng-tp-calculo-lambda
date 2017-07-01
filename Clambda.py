@@ -1,7 +1,8 @@
 #pylint: disable=C0103
 "Script principal para ejecutar el parser."
 from sys import argv
-from lambda_parser import apply_parser
+from lambda_lexer import apply_lexer
+#from lambda_parser import apply_parser
 
 if __name__ == "__main__":
     script_input = ""
@@ -10,4 +11,12 @@ if __name__ == "__main__":
         script_input = " ".join(argv[1:])
     else:
         script_input = input("lambda> ")
-    print(apply_parser(script_input))
+
+    lexer = apply_lexer(script_input)    
+
+    #Ver resultado de tokens
+    for t in lexer:
+    	print(t)
+
+    #Ver resultado de pertenencia y AST
+    #print(apply_parser(script_input))
