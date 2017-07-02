@@ -1,10 +1,8 @@
 #pylint: disable=C0103,C0111
 "Lexer para calculo lambda con Bool y Nat"
 
-from ply import lex
-
 #Palabras reservadas
-reserved = {
+reserved_key_words = {
     'true'   : 'TRUE',
     'false'  : 'FALSE',
     'if'     : 'IF',
@@ -25,24 +23,23 @@ tokens = [
     "POINT",
     "L_BRACKET",
     "R_BRACKET",
-    "NUMBER"
-] + list(reserved.values())
+    "NUMBER",
+    "LAMBDA_TYPE"
+] + list(reserved_key_words.values())
 
 t_LAMBDA = r"\\"
 t_TYPE   = r":"
 t_POINT  = r"\."
 t_L_BRACKET = r"\("
 t_R_BRACKET = r"\)"
-
-#Saltos de linea?
-# t_ignore = " \n"
+t_LAMBDA_TYPE = r"->"
 
 # Espacios y tabs
 t_ignore_WHITESPACES = r"[ \t]+"
 
 def t_VAR(t):
     r"[a-z|A-Z]+"
-    t.type = reserved.get( t.value, 'VAR' )
+    t.type = reserved_key_words.get( t.value, 'VAR' )
     return t
 
 def t_NUMBER(t):
@@ -60,11 +57,3 @@ def t_error(t):
 
     print(message)
     t.lexer.skip(1)
-
-#Construyo el lexer
-lexer = lex.lex()
-
-def apply_lexer(string):
-    "Aplica el lexer al string dado"
-    lexer.input(string)
-    return list(lexer)
