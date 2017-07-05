@@ -15,7 +15,8 @@ if __name__ == "__main__":
     try:
         print(process_entry(script_input))
     except KeyError as e:
-        print("ERROR: El termino no es cerrado (%s esta libre)." %(e), file=sys.stderr)
+        print("ERROR: El termino no es cerrado (%s esta libre)." 
+            %(e), file=sys.stderr)
         sys.exit(1)
     except TypeError as e:
         print("ERROR: " + str(e), file=sys.stderr)

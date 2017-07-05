@@ -11,7 +11,7 @@ from expressions  import *
 ######################## Expresiones ########################
 
 precedence = [
-    ('right', 'APP')
+    ('left', 'APP')
 ]
 
 def p_brackets(p):

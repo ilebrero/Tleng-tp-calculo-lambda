@@ -15,6 +15,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{listingsutf8}
+%\usepackage{listings}
 
 \usepackage{float}
 \floatplacement{figure}{h!}
@@ -56,8 +57,8 @@
 \subtitulo{Analizador Sintáctico y Semántico para $\lambda^{bn}$ \\ \today}
 \grupo{Grupo: }
  
-\integrante{Francisco Leto}{249/09}{leto.francisco@gmail.com}
-\integrante{Ignacio Lebrero Rial}{}{}
+\integrante{Francisco Leto Mera}{249/09}{leto.francisco@gmail.com}
+\integrante{Ignacio Lebrero Rial}{751/13}{ignaciolebrero@gmail.com}
 \integrante{Federico Beuter}{827/13}{federicobeuter@gmail.com}
  
 \maketitle
@@ -153,11 +154,34 @@ En caso de utilizar la primera opción, es importante tener en cuenta el correct
 
 Ademas, se brinda el archivo \emph{tests.py} que utilizando la libreria de \emph{Python} de \emph{Unit Test} valida $13$ casos de prueba distintos, que figuran en el enunciado y sirven como validación extra respecto a los ejemplos brindados previamente. 
 
-\section{Código fuente}
+\section{Detalles de implementación}
 
+El código fuente utilizado puede encontrarse en el capitulo \ref{codigo} pero a continuación aclaramos algunas de las decisiones de diseño que consideramos más importantes:
+
+\begin{itemize}
+	\item Utilizamos los tipos nativos de \emph{Python} para la implementación de la semantica para facilitar las operaciones, y representamos los tipos de lambda como una tupla.
+	
+	\item Todos los métodos de las expresiones utilizadas implementan el método \emph{\_\_str\_\_} propio de \emph{Python que permite representarlos como un string}. Utilizando esto podemos convertir cada expresión en un string de salida cuando es necesario (cuando forma parte de un valor lambda, por ejemplo) y cada método tiene las particularidades del mismo a la hora de procesarlo.
+	
+	\item Al utilizar los typos de \emph{Python} los $Nat$ son convertidos a números durante la evaluación. Al finalizar la misma son reconvertidos a una anidación de \emph{succ} utilizando una expresión regular.
+	
+	\item Utilizamos el marcado especial \emph{APP} para indicar la asociación de la aplicación en las reglas sintácticas.
+	
+	\item La función \emph{get\_type\_str} se encarga de convertir los tipos internos de \emph{Python} en su correcta representación en Cálculo Lambda cuando esto es necesario.
+	
+\section{Concluciones}
+
+	Disfrutamos mucho de la realización del TP y encontramos muy grato implementar lo que se estuvo viendo a lo largo del cuatrimestre. PLY como una implementación pura en \emph{Python} no es muy performante, pero brinda excelentes herramientas para generar parsers \emph{LALR} y es sencillo de usar, aunque su uso intensivo de meta-programación requiere un conocimiento bastante avanzado del lenguaje.
+	
+	En general consideramos que realizamos un trabajo satisfactorio. Fuimos capaces de construir una gramática para el lenguaje y brindar un parser LALR que la parsee y evalué, realizando el chequeo e inferencia de tipos en el proceso.
+\end{itemize}
+
+\newpage
+\section{Código fuente}\label{codigo}
+\lstset{backgroundcolor=\color{white}} 
 \subsection{CLambda.py}
 \begin{small}
-  \verbatiminput{../CLambda.py}
+  \verbatiminput{../Clambda.py}
 \end{small}
 
 \subsection{parser\_processing.py}
