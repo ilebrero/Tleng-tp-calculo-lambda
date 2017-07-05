@@ -1,5 +1,6 @@
 #pylint: disable=C0103,C0111,W0611
 "El parser para calculo lambda"
+import sys
 import ply.yacc as yacc
 
 from operator import add, is_
@@ -8,6 +9,10 @@ from lambda_lexer import tokens
 from expressions  import *
 
 ######################## Expresiones ########################
+
+def p_brackets(p):
+    "exp : L_BRACKET exp R_BRACKET"
+    p[0] = p[2]
 
 def p_true(p):
     "exp : TRUE"
@@ -58,5 +63,6 @@ def p_var_from_exp(p):
     p[0] = Var(p[1])
 
 def p_error(_):
-    print("Hubo un error en el parseo. Sintaxis invalida")
+    print("Hubo un error en el parseo. Sintaxis invalida", file=sys.stderr)
+    sys.exit(1)
     #parser.restart()

@@ -3,6 +3,15 @@
 
 global_context = {}
 
+def convert(var_type):
+    if var_type == "Nat":
+        return int
+    elif var_type == "Bool":
+        return bool
+    else:
+        a, b = var_type.split("->")
+        return (convert(a.strip()), convert(b.strip()))
+
 #Palabras reservadas
 reserved_keywords = {
     'if'     : 'IF',
@@ -54,17 +63,11 @@ def t_error(t):
     t.lexer.skip(1)
 
 def t_VAR_DECLARATION(t):
-    r"[a-z|A-Z]:(Nat|Bool|(Nat|Bool)->(Nat|Bool))"
+    r"[a-z|A-Z]:((Nat|Bool)->(Nat|Bool)|Nat|Bool)"
     var, var_type = t.value.split(":")
     var_type = var_type.strip()
     t.value = var
-    if var_type == "Nat":
-        t.var_type = int
-    elif var_type == "Bool":
-        t.var_type = bool
-    else:
-        a,b = var_type.split("->")
-        t.var_type = (a.trim(), b.trim())
+    t.var_type = convert(var_type)
     global_context[t.value] = t.var_type
     return t
 
