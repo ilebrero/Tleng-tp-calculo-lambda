@@ -29,19 +29,16 @@ tokens = [
     "VAR_DECLARATION",
     "VAR_USAGE",
     "LAMBDA",
-    "TYPE",
     "POINT",
     "L_BRACKET",
     "R_BRACKET",
     "ZERO",
-    "LAMBDA_TYPE",
 ] + list(reserved_keywords.values())
 
 t_LAMBDA = r"\\"
 t_POINT = r"\."
 t_L_BRACKET = r"\("
 t_R_BRACKET = r"\)"
-t_LAMBDA_TYPE = r"->"
 
 # Espacios y tabs
 t_ignore_WHITESPACES = r"[ \t]+"

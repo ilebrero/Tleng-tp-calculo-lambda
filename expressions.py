@@ -4,6 +4,8 @@ from operator import is_, add
 from lambda_lexer import global_context
 
 def get_type_str(t):
+    if hasattr(t, "type"):
+        t = t.type
     if t == bool:
         return "Bool"
     elif t == int:
@@ -21,12 +23,25 @@ def get_type_str(t):
             b = get_type_str(t[1])
         return "%s->%s"%(a, b)
 
+def get_input_type_of_function(t):
+    if t[0] == int:
+        return Number(0)
+    elif t[0] == bool:
+        return Boolean("true")
+    elif isinstance(t[0], tuple):
+        return Function(t[0])
+
 def checkType(a, b, err):
-    if isinstance(a, tuple):
-        for i, _ in enumerate(a):
-            checkType(a[i], b[i], err)
-    elif a.type != b.type:
-        raise TypeError(err)
+    if isinstance(a, Function):
+        for i, _ in enumerate(a.type):
+            checkType(a.type[i], b.type[i], err)
+    else:
+        try:
+            if a.type != b.type:
+                raise TypeError(err)
+        except AttributeError:
+            if a != b:
+                raise TypeError(err)
 
 class Expression(object):
     def evaluate(self):
@@ -47,10 +62,7 @@ class Application(Expression):
     def __init__(self, expression1, expression2):
         exp1_type = None
         try:
-            if expression1.type[0] == int:
-                exp1_type = Number(0)
-            elif expression1.type[0] == bool:
-                exp1_type = Boolean("true")
+            exp1_type = get_input_type_of_function(expression1.type)
         except TypeError:
             raise TypeError("La parte izquierda de la aplicación (%s) no es una función con dominio %s" 
                 %(str(expression1), get_type_str(expression2.type)))
@@ -62,6 +74,7 @@ class Application(Expression):
         self.type = expression1.type[1]
 
     def	evaluate(self):
+        self.expression1 = self.expression1.evaluate()
         return self.expression1.evaluate(self.expression2.evaluate())
 
     def __str__(self):
@@ -111,10 +124,10 @@ class NatOperation(Expression):
     def evaluate(self):
         val1 = self.val.evaluate()
         val2 = self.added_val.evaluate()
-        evaluation = self.op(val1[0], val2[0])
+        evaluation = self.op(val1, val2)
         self.type = type(evaluation)
         self.value = evaluation
-        return (self.value, self.type)
+        return self.value
 
     def __str__(self):
         return self.op_str + "(" + str(self.val) + ")"
@@ -127,7 +140,7 @@ class Boolean(Expression):
         self.value = (value == "true")
 
     def evaluate(self):
-        return (self.value, self.type)
+        return self.value
 
     def __str__(self):
         if self.value:
@@ -141,10 +154,14 @@ class Number(Expression):
         self.value = int(value)
 
     def evaluate(self):
-        return (self.value, self.type)
+        return self.value
 
     def __str__(self):
         return str(self.value)
+
+class Function(Expression):
+    def __init__(self, tuple):
+        self.type = tuple
 
 class Var(Expression):
     def __init__(self, value):
@@ -152,7 +169,7 @@ class Var(Expression):
         self.type = global_context[value]
 
     def evaluate(self):
-        return (global_context[self.value], self.type)
+        return global_context[self.value]
 
     def __str__(self):
         return self.value
@@ -168,7 +185,7 @@ class Lambda(Expression):
             global_context[self.variable] = x
             return self.expression.evaluate()
         else:
-            return (str(self), self.type)
+            return self
 
     def __str__(self):
         return "\\" + self.variable + ":" + get_type_str(self.type[0]) + \

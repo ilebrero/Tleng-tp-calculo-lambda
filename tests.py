@@ -72,7 +72,7 @@ class TestLambdaParser(unittest.TestCase):
 
     def test_complex_lambda_eval(self):
         self.assertEqual(
-            process_entry("\\x:Nat->Nat.\\y:Nat.(\\z:Bool.if z then x y else 0) succ(succ(succ(succ(succ(succ(succ(succ(0)))))))) true"),
+            process_entry("(\\x:Nat->Nat.\\y:Nat.(\\z:Bool.if z then x y else 0)) (\\j:Nat.succ(j)) succ(succ(succ(succ(succ(succ(succ(succ(0)))))))) true"),
             "succ(succ(succ(succ(succ(succ(succ(succ(succ(0))))))))):Nat"
         )
 
