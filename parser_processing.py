@@ -32,7 +32,13 @@ def process_entry(text):
     global_context.clear()
     #Hago las conversiones necesarias para mostrar bien los tipos
     if isinstance(res_type, tuple):
-        res_type = "%s->%s" %(get_type_str(res_type[0]), get_type_str(res_type[1]))
+        a = get_type_str(res_type[0])
+        b = get_type_str(res_type[1])
+        if isinstance(res_type[0], tuple):
+            a = "(" + a + ")"
+        if isinstance(res_type[1], tuple):
+            b = "(" + b + ")"
+        res_type = "%s->%s" %(a, b)
     else:
         res_type = get_type_str(res_type)
     return "%s:%s" %(hack_numbers(text, str(value)), res_type)

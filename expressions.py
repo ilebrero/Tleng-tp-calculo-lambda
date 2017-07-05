@@ -159,17 +159,9 @@ class Var(Expression):
 
 class Lambda(Expression):
     def __init__(self, variable, expression):
-        #if isinstance(variable.type, tuple):
-        #    l = list(variable.type)
-        #    if l[0] == "Nat": l[0] = int
-        #    else: l[0] = bool
-        #    if l[1] == "Nat": l[1] = int
-        #    else: l[1] = bool
-        #    self.type = (tuple(l), expression.type)
-        #else:
         self.type = (variable.type, expression.type)
         self.variable = variable.value
-        self.expression = expression        
+        self.expression = expression
 
     def	evaluate(self, x=None):
         if x:
