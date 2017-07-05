@@ -94,15 +94,16 @@ La gramática propuesta intenta ser lo mas simple posible, teniendo en cuenta la
 
 \begin{lstlisting}
 E -> (E) | A
-A -> \ VAR_DECLARATION.E | C
+A -> \ D.E | C
+D -> VAR_DECLARATION
 C -> if E then E else E | P
-P -> E Q | F
-Q -> E
+P -> E E
 F -> succ(E) | pred(E) | iszero(E) | G
 G -> 0 | true | false | V
 V -> VAR_USAGE
 \end{lstlisting}
 
+Hay un claro problema de ambigüedad en $ P \rightarrow E E$ que resolvimos en la implementación determinando a mano la precedencia. En total PLY presenta $20$ conflictos, que desembocan principalmente de este, pero junto con lo definido a mano, y el default de PLY en caso de conflicto (hacer \emph{shift}) es suficiente para implementar el lenguaje deseado adecuadamente.
 
 \section{Analisis Semantico}
 
