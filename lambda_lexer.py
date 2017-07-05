@@ -60,7 +60,7 @@ def t_error(t):
     t.lexer.skip(1)
 
 def t_VAR_DECLARATION(t):
-    r"[a-z|A-Z]:((Nat|Bool)->(Nat|Bool)|Nat|Bool)"
+    r"[a-z|A-Z]+:((Nat|Bool)->(Nat|Bool)|Nat|Bool)"
     var, var_type = t.value.split(":")
     var_type = var_type.strip()
     t.value = var

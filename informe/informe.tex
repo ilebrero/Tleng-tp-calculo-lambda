@@ -26,15 +26,6 @@
 \usepackage{xcolor}
 
 \usepackage[space]{grffile}
-
-\geometry{
- a4paper,
- total={210mm,297mm},
- left=30mm,
- right=30mm,
- top=30mm,
- bottom=30mm,
-}
  
 \usepackage{booktabs}
 
@@ -51,6 +42,12 @@
 \theoremstyle{remark}
 \newtheorem*{remark}{Observación}
  
+\lstset{
+	basicstyle=\itshape,
+	xleftmargin=3em,
+	literate={->}{$\rightarrow$}{2}
+} 
+ 
 \begin{document}
 % Estos comandos deben ir antes del \maketitle
 \materia{Teoria de Lenguajes} % obligatorio
@@ -59,7 +56,7 @@
 \subtitulo{Analizador Sintáctico y Semántico para $\lambda^{bn}$ \\ \today}
 \grupo{Grupo: }
  
-\integrante{Francisco Leto}{}{}
+\integrante{Francisco Leto}{249/09}{leto.francisco@gmail.com}
 \integrante{Ignacio Lebrero Rial}{}{}
 \integrante{Federico Beuter}{827/13}{federicobeuter@gmail.com}
  
@@ -75,97 +72,48 @@ En este infome se describe la implementacion de un analizador sintactico y seman
 
 \section{Gramatica}
 
-Debido a la naturaleza del calculo lambda tipado, la gramatica suele ser bastante simple, este caso no fue distinto. Lo mas importante a tener en cuenta es la asociatividad de las aplicaciones, en este caso es a la izquierda, es decir \texttt{M N P = (M N) P}. La gramatica libre de contexto resultante fue la siguiente:
+\subsection{Lexer}
 
-\begin{verbatim}
-AGREGAR LA GRAMATICA FINAL
-
-Grammar
-
-Rule 0     S' -> exp
-Rule 1     exp -> L_BRACKET exp R_BRACKET
-Rule 2     exp -> TRUE
-Rule 3     exp -> FALSE
-Rule 4     exp -> IF exp THEN exp ELSE exp
-Rule 5     exp -> LAMBDA var POINT exp
-Rule 6     exp -> exp exp
-Rule 7     exp -> L_BRACKET exp R_BRACKET exp
-Rule 8     exp -> ZERO
-Rule 9     exp -> ISZERO L_BRACKET exp R_BRACKET
-Rule 10    exp -> PRED L_BRACKET exp R_BRACKET
-Rule 11    exp -> SUCC L_BRACKET exp R_BRACKET
-Rule 12    var -> VAR_DECLARATION
-Rule 13    exp -> VAR_USAGE
-\end{verbatim}
-
-Los simbolos terminales son:
-
-\begin{verbatim}
-AGREGAR SIMBOLOS TERMINALES
-
-Terminals, with rules where they appear
-
-ELSE                 : 4
-FALSE                : 3
-IF                   : 4
-ISZERO               : 9
-LAMBDA               : 5
-LAMBDA_TYPE          : 
-L_BRACKET            : 1 7 9 10 11
-POINT                : 5
-PRED                 : 10
-R_BRACKET            : 1 7 9 10 11
-SUCC                 : 11
-THEN                 : 4
-TRUE                 : 2
-TYPE                 : 
-VAR_DECLARATION      : 12
-VAR_USAGE            : 13
-ZERO                 : 8
-error                : 
-\end{verbatim}
-
-Los simbolos no terminales son:
-
-\begin{verbatim}
-AGREGAR SIMBOLOS NO TERMINALES
-
-exp                  : 1 4 4 4 5 6 6 7 7 9 10 11 0
-var                  : 5
-\end{verbatim}
-
-\section{Lexer}
-
-Para la identificacion de tokens empleamos las siguientes expresiones regulares:
+El primer paso para la construcción de nuestra gramática fue la identificación de los \emph{tokens} y palabras reservadas. Utilizamos las siguientes palabras reservadas y literales: \textbf{if, then, else, succ, pred, iszero, true, false, `(', `)', `.', `\textbackslash', 0}. Definimos, ademas, los siguientes tokens, que se identificaron con las expresiones regulares detalladas a continuación.
 
 \begin{center}
 	\begin{tabular}{@{}ll@{}}
 		\toprule
-			Token & Expresion Regular \\ \midrule
-			VAR\_DECLARATION &  {[}a-z\textbar A-Z{]}:((Nat\textbar Bool)-\textgreater (Nat\textbar Bool)\textbar Nat\textbar Bool)\\
-			VAR\_USAGE &  {[}a-z\textbar A-Z{]}\\
-			LAMBDA &  \textbackslash\\
-			TYPE &  AGREGAR\\
-			POINT & .\\
-			L\_BRACKET & (\\
-			R\_BRACKET & )\\
-			ZERO & 0 \\
-			LAMBDA\_TYPE & -\textgreater\\
+		Token & Expresion Regular \\ \midrule
+		VAR\_DECLARATION &  {[}a-z\textbar A-Z{]+}:((Nat\textbar Bool)-\textgreater (Nat\textbar Bool)\textbar Nat\textbar Bool)\\
+		VAR\_USAGE &  {[}a-z\textbar A-Z{]+}\\
 		\bottomrule
 	\end{tabular}
 \end{center}
 
+Ademas, el lexer ignora los caracteres en blanco y descompone el token de VAR\_DECLARATION en un objeto con el valor de la variable y su tipo. En la implementación, los literales se definieron como tokens para facilitar la implementación.
+
+La gramática propuesta intenta ser lo mas simple posible, teniendo en cuenta la precedencia y asociatividad de los operadores, y evitando ambigüedades.
+
+
+\begin{lstlisting}
+E -> (E) | A
+A -> \ VAR_DECLARATION.E | C
+C -> if E then E else E | P
+P -> E Q | F
+Q -> E
+F -> succ(E) | pred(E) | iszero(E) | G
+G -> 0 | true | false | V
+V -> VAR_USAGE
+\end{lstlisting}
+
+
 \section{Analisis Semantico}
 
-Nuestro parser valida lo siguiente (AGREGAR LO QUE FALTE O ME HAYA COMIDO POR BOLUDO):
+Nuestro codigo, utilizando \emph{PLY} construye un parser LARL para la gramática propuesta. Luego le agregamos semantica, que permite realizar el chequeo e inferencia de tipo, junto con la evaluación de las cadenas bien formadas. Parte de lo implementado consiste en: 
 
 \begin{itemize}
-	\item Se asegura de que la condicion del \texttt{if} sea del tipo booleano.
-	\item Se asegura de que ambas opciones del \texttt{if} tengan el mismo tipo.
-	\item Se asegura de que el tipo de la expresion lambda sea valido, es decir, \texttt{bool} o \texttt{nat}
-	\item Se asegura de que en caso de que una expresion lambda sea evaluada, el valor con la que se la evalua se corresponda al propio de la expresion.
-	\item Se asegura de que \texttt{succ} y \texttt{pred} se apliquen solamente a valores de tipo \texttt{nat}.
-	\item Se asegura de que \texttt{isZero} unicamente se aplique a valores de tipo \texttt{bool}.
+	\item Asegurar que la guarda de la condición sea del tipo booleano.
+	\item Asegurar que ambas ramas de la condición tengan el mismo tipo.
+	\item Se asegura de que el tipo de la variable en la abstracción lambda sea valido.
+	\item Se asegura de que \texttt{succ} y \texttt{pred} y \texttt{iszero} se apliquen solamente a valores de tipo \texttt{Nat}.
+	\item Infiere los tipos cuando esto es posible.
+	\item Respeta la precedencia y asociatividad al evaluar la cadenas de entrada.
 \end{itemize}
 
 \section{Evaluaciones}
@@ -192,14 +140,18 @@ succ(iszero(true))                                   & ERROR: iszero espera un v
 
 \section{Manual de Usuario}
 
-Para poder ejecutar el parser, es necesario emplear Python 3 con PLY instalado. Una vez que se tienen todas las dependencias, se puede ejecutar con cualquiera de los siguientes dos comandos:
+Para poder ejecutar el parser, es necesario emplear Python 3 con PLY instalado. Es posible instalar las dependencias ejecutando \textbf{pip install -r requirements.txt }Una vez que se tienen todas las dependencias, se puede ejecutar con cualquiera de los siguientes dos comandos:
 
 \begin{itemize}
 	\item \texttt{python CLambda.py}
 	\item \texttt{python CLambda.py expresionLambda}
 \end{itemize}
 
-El segundo recibe la expresion lambda directamente y la evalua, mientras que el primero recibe la expresion por \texttt{stdin} mediante la consola. Los resultados de la evaluacion se imprimen por \texttt{stdout} en caso de que sea satisfactoria, en el caso contrario se imprime el motivo de error por \texttt{stderr}.
+El segundo recibe la expresión lambda directamente y la evalua, mientras que el primero recibe la expresion por \texttt{stdin} mediante la consola. Los resultados de la evaluación se imprimen por \texttt{stdout} en caso de que sea satisfactoria, en el caso contrario se imprime el motivo de error por \texttt{stderr} y se para la ejecución con código de salida $1$.
+
+En caso de utilizar la primera opción, es importante tener en cuenta el correcto escapado de los caracteres en la terminal. Para evitar estos problemas, se recomienda la segunda opción.
+
+Ademas, se brinda el archivo \emph{tests.py} que utilizando la libreria de \emph{Python} de \emph{Unit Test} valida $13$ casos de prueba distintos, que figuran en el enunciado y sirven como validación extra respecto a los ejemplos brindados previamente. 
 
 \section{Código fuente}
 
