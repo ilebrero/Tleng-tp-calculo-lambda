@@ -1,0 +1,231 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{caratula}
+
+\usepackage{graphicx}
+\usepackage{enumerate}
+
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listingsutf8}
+
+\usepackage{float}
+\floatplacement{figure}{h!}
+
+\usepackage{geometry}
+\usepackage{wrapfig}
+\usepackage{cite}
+\usepackage{dsfont}
+\usepackage{xcolor}
+
+\usepackage[space]{grffile}
+
+\geometry{
+ a4paper,
+ total={210mm,297mm},
+ left=30mm,
+ right=30mm,
+ top=30mm,
+ bottom=30mm,
+}
+ 
+\usepackage{booktabs}
+
+\usepackage{verbatim}
+\usepackage{qtree}
+
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{corollary}{Corolario}[theorem]
+\newtheorem{lemma}{Lema}[theorem]
+ 
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[section]
+ 
+\theoremstyle{remark}
+\newtheorem*{remark}{Observación}
+ 
+\begin{document}
+% Estos comandos deben ir antes del \maketitle
+\materia{Teoria de Lenguajes} % obligatorio
+
+\titulo{TP1}
+\subtitulo{Analizador Sintáctico y Semántico para $\lambda^{bn}$ \\ \today}
+\grupo{Grupo: }
+ 
+\integrante{Francisco Leto}{}{}
+\integrante{Ignacio Lebrero Rial}{}{}
+\integrante{Federico Beuter}{827/13}{federicobeuter@gmail.com}
+ 
+\maketitle
+
+\tableofcontents
+
+\pagebreak
+
+\section{Introduccion}
+
+En este infome se describe la implementacion de un analizador sintactico y semantico para $\lambda^{bn}$. En base al lenguaje presentado se procedio a construir una gramatica acorde, la cual luego fue utilizada para implementar el correspondiente Lexer y Parser. La implementacion fue realizado empleando Python junto con la libreria PLY (\textbf{P}ython \textbf{L}ex-\textbf{Y}acc) \footnote{PLY (Python Lex-Yacc): http://www.dabeaz.com/ply/ply.html}.
+
+\section{Gramatica}
+
+Debido a la naturaleza del calculo lambda tipado, la gramatica suele ser bastante simple, este caso no fue distinto. Lo mas importante a tener en cuenta es la asociatividad de las aplicaciones, en este caso es a la izquierda, es decir \texttt{M N P = (M N) P}. La gramatica libre de contexto resultante fue la siguiente:
+
+\begin{verbatim}
+AGREGAR LA GRAMATICA FINAL
+
+Grammar
+
+Rule 0     S' -> exp
+Rule 1     exp -> L_BRACKET exp R_BRACKET
+Rule 2     exp -> TRUE
+Rule 3     exp -> FALSE
+Rule 4     exp -> IF exp THEN exp ELSE exp
+Rule 5     exp -> LAMBDA var POINT exp
+Rule 6     exp -> exp exp
+Rule 7     exp -> L_BRACKET exp R_BRACKET exp
+Rule 8     exp -> ZERO
+Rule 9     exp -> ISZERO L_BRACKET exp R_BRACKET
+Rule 10    exp -> PRED L_BRACKET exp R_BRACKET
+Rule 11    exp -> SUCC L_BRACKET exp R_BRACKET
+Rule 12    var -> VAR_DECLARATION
+Rule 13    exp -> VAR_USAGE
+\end{verbatim}
+
+Los simbolos terminales son:
+
+\begin{verbatim}
+AGREGAR SIMBOLOS TERMINALES
+
+Terminals, with rules where they appear
+
+ELSE                 : 4
+FALSE                : 3
+IF                   : 4
+ISZERO               : 9
+LAMBDA               : 5
+LAMBDA_TYPE          : 
+L_BRACKET            : 1 7 9 10 11
+POINT                : 5
+PRED                 : 10
+R_BRACKET            : 1 7 9 10 11
+SUCC                 : 11
+THEN                 : 4
+TRUE                 : 2
+TYPE                 : 
+VAR_DECLARATION      : 12
+VAR_USAGE            : 13
+ZERO                 : 8
+error                : 
+\end{verbatim}
+
+Los simbolos no terminales son:
+
+\begin{verbatim}
+AGREGAR SIMBOLOS NO TERMINALES
+
+exp                  : 1 4 4 4 5 6 6 7 7 9 10 11 0
+var                  : 5
+\end{verbatim}
+
+\section{Lexer}
+
+Para la identificacion de tokens empleamos las siguientes expresiones regulares:
+
+\begin{center}
+	\begin{tabular}{@{}ll@{}}
+		\toprule
+			Token & Expresion Regular \\ \midrule
+			VAR\_DECLARATION &  {[}a-z\textbar A-Z{]}:((Nat\textbar Bool)-\textgreater (Nat\textbar Bool)\textbar Nat\textbar Bool)\\
+			VAR\_USAGE &  {[}a-z\textbar A-Z{]}\\
+			LAMBDA &  \textbackslash\\
+			TYPE &  AGREGAR\\
+			POINT & .\\
+			L\_BRACKET & (\\
+			R\_BRACKET & )\\
+			ZERO & 0 \\
+			LAMBDA\_TYPE & -\textgreater\\
+		\bottomrule
+	\end{tabular}
+\end{center}
+
+\section{Analisis Semantico}
+
+Nuestro parser valida lo siguiente (AGREGAR LO QUE FALTE O ME HAYA COMIDO POR BOLUDO):
+
+\begin{itemize}
+	\item Se asegura de que la condicion del \texttt{if} sea del tipo booleano.
+	\item Se asegura de que ambas opciones del \texttt{if} tengan el mismo tipo.
+	\item Se asegura de que el tipo de la expresion lambda sea valido, es decir, \texttt{bool} o \texttt{nat}
+	\item Se asegura de que en caso de que una expresion lambda sea evaluada, el valor con la que se la evalua se corresponda al propio de la expresion.
+	\item Se asegura de que \texttt{succ} y \texttt{pred} se apliquen solamente a valores de tipo \texttt{nat}.
+	\item Se asegura de que \texttt{isZero} unicamente se aplique a valores de tipo \texttt{bool}.
+\end{itemize}
+
+\section{Evaluaciones}
+
+\subsection{Expresiones correctas}
+
+\begin{tabular}{|l|l|}
+\hline
+Expresion                                                                    & Evaluacion                                          \\ \hline
+if true then (\textbackslash x:Bool.false) else (\textbackslash x:Bool.true) & \textbackslash x:Bool.false:Bool-\textgreater Bool   \\ \hline
+\textbackslash x:Nat.iszero(x)                                               & \textbackslash x:Nat.iszero(x):Nat-\textgreater Bool \\ \hline
+pred(succ(succ(0)))                                                          & succ(0):Nat                                         \\ \hline
+\end{tabular}
+
+\subsection{Expresiones incorrectas}
+
+\begin{tabular}{|l|l|}
+\hline
+Expresion                                            & Salida                                                   \\ \hline
+if true then false else (\textbackslash x:Bool.true) & ERROR: Las dos opciones del if deben tener el mismo tipo \\ \hline
+\textbackslash x.Not.succ(x)                         & Hubo un error en el parseo. Sintaxis invalida            \\ \hline
+succ(iszero(true))                                   & ERROR: iszero espera un valor de tipo Nat                \\ \hline
+\end{tabular}
+
+\section{Manual de Usuario}
+
+Para poder ejecutar el parser, es necesario emplear Python 3 con PLY instalado. Una vez que se tienen todas las dependencias, se puede ejecutar con cualquiera de los siguientes dos comandos:
+
+\begin{itemize}
+	\item \texttt{python CLambda.py}
+	\item \texttt{python CLambda.py expresionLambda}
+\end{itemize}
+
+El segundo recibe la expresion lambda directamente y la evalua, mientras que el primero recibe la expresion por \texttt{stdin} mediante la consola. Los resultados de la evaluacion se imprimen por \texttt{stdout} en caso de que sea satisfactoria, en el caso contrario se imprime el motivo de error por \texttt{stderr}.
+
+\section{Código fuente}
+
+\subsection{CLambda.py}
+\begin{small}
+  \verbatiminput{../CLambda.py}
+\end{small}
+
+\subsection{parser\_processing.py}
+\begin{small}
+  \verbatiminput{../parser_processing.py}
+\end{small}
+
+\subsection{lambda\_lexer.py}
+\begin{small}
+  \verbatiminput{../lambda_lexer.py}
+\end{small}
+
+\subsection{lambda\_parser.py}
+\begin{small}
+  \verbatiminput{../lambda_parser.py}
+\end{small}
+
+\subsection{expressions.py}
+\begin{small}
+  \verbatiminput{../expressions.py}
+\end{small}
+
+\end{document}
