@@ -12,7 +12,7 @@ from expressions  import *
 
 def p_brackets(p):
     "exp : L_BRACKET exp R_BRACKET"
-    p[0] = p[2]
+    p[0] = Brackets(p[2])
 
 def p_true(p):
     "exp : TRUE"

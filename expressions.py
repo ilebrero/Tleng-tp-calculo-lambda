@@ -32,6 +32,17 @@ class Expression(object):
     def evaluate(self):
         raise NotImplementedError
 
+class Brackets(Expression):
+    def __init__(self, exp):
+        self.exp = exp
+        self.type = self.exp.type
+
+    def evaluate(self):
+        return self.exp.evaluate()
+
+    def __str__(self):
+        return "(" + str(self.exp) + ")"
+
 class Application(Expression):
     def __init__(self, expression1, expression2):
         exp1_type = None

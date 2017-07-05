@@ -72,8 +72,8 @@ class TestLambdaParser(unittest.TestCase):
 
     def test_complex_lambda_eval(self):
         self.assertEqual(
-            process_entry("\\x:Nat->Nat.\\y:Nat.(\\z:Bool.if z then x y else 0) 8 true"),
-            "9:Nat"
+            process_entry("\\x:Nat->Nat.\\y:Nat.(\\z:Bool.if z then x y else 0) succ(succ(succ(succ(succ(succ(succ(succ(0)))))))) true"),
+            "succ(succ(succ(succ(succ(succ(succ(succ(succ(0))))))))):Nat"
         )
 
 if __name__ == "__main__":
