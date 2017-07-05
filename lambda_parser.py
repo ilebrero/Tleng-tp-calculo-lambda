@@ -38,8 +38,8 @@ def p_apply_2(p):
     "exp : L_BRACKET exp R_BRACKET exp"
     p[0] = Application(p[2], p[4])
 
-def p_num(p):
-    "exp : NUMBER"
+def p_zero(p):
+    "exp : ZERO"
     p[0] = Number(p[1])
 
 def p_is_zero(p):

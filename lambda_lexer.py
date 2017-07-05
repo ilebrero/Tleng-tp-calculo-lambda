@@ -33,7 +33,7 @@ tokens = [
     "POINT",
     "L_BRACKET",
     "R_BRACKET",
-    "NUMBER",
+    "ZERO",
     "LAMBDA_TYPE",
 ] + list(reserved_keywords.values())
 
@@ -46,8 +46,8 @@ t_LAMBDA_TYPE = r"->"
 # Espacios y tabs
 t_ignore_WHITESPACES = r"[ \t]+"
 
-def t_NUMBER(t):
-    r"\d+"
+def t_ZERO(t):
+    r"0"
     t.value = int(t.value)
     return t
 
